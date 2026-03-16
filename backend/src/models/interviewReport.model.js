@@ -28,8 +28,8 @@ const skillGapSchema = new mongoose.schema({
 },{_id:false});
 
 const preparationPlanSchema = new mongoose.schema({
-    date:{
-        type:number,
+    day:{
+        type:Number,
         required:true
     },
     focus:{

@@ -3,6 +3,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRoutes from './routes/auth.route.js';
+import interviewRoutes from './routes/interview.route.js';
 
 //ENV Configuration
 dotenvConfig();
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/interview',interviewRoutes);
 
 
 export default app;
