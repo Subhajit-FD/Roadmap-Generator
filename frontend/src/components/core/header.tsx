@@ -5,20 +5,19 @@ import { useScroll } from "@/hooks/use-scroll";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { MobileNav } from "@/components/core/mobile-nav";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
-import { useAppSelector, useAppDispatch } from "@/redux/redux-hooks";
 import { Link } from "react-router-dom";
-import { logoutUser } from "@/redux/features/authentication/authenticationSlice";
-
+import { useAuth } from "@/hooks/use-auth";
 
 export function Header() {
 	const scrolled = useScroll(10);
-	const navLinks = useAppSelector((state) => state.navlinks);
-	const isAuthenticated = useAppSelector((state) => state.authentication.isAuthenticated);
-	const dispatch = useAppDispatch();
-
-	const handleLogout = () => {
-		dispatch(logoutUser());
-	};
+	const { user, handleLogout } = useAuth();
+	const navLinks = [{
+		label: "Features",
+		href: "/features",
+	},{
+		label: "Pricing",
+		href: "/pricing",
+	}];
 
 	return (
 		<header
@@ -47,21 +46,41 @@ export function Header() {
 				<div className="hidden items-center gap-2 md:flex">
 					<div>
 						{navLinks.map((link) => (
-							<Link key={link.label} className={buttonVariants({ variant: "ghost", size: "sm" })} to={link.href}>
+							<a 
+								key={link.label} 
+								className={buttonVariants({ variant: "ghost", size: "sm" })} 
+								href={link.href}
+							>
 								{link.label}
-							</Link>
+							</a>
 						))}
 					</div>
-					{isAuthenticated ? (
-						<Button variant="outline" size="sm" onClick={handleLogout}>
-							Logout
-						</Button>
+					{user ? (
+						<div className="flex items-center gap-4">
+							<Link to="/dashboard" className={buttonVariants({ variant: "ghost", size: "sm" })} >
+								Dashboard
+							</Link>
+							{user.unlimitedExpiresAt && new Date(user.unlimitedExpiresAt) > new Date() ? (
+								<div className={buttonVariants({ variant: "outline", size: "sm" })}>
+									<span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+									Unlimited
+								</div>
+							) : (
+								<div className={buttonVariants({ variant: "outline", size: "sm" })}>
+									<span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+									Tokens: {user.tokens ?? 0}
+								</div>
+							)}
+							<Button variant="outline" size="sm" onClick={handleLogout}>
+								Logout
+							</Button>
+						</div>
 					) : (
 						<Link className={buttonVariants({ variant: "outline", size: "sm" })} to="/sign-in">
 							Sign In
 						</Link>
 					)}
-					<Button size="sm">Get Started</Button>
+					<Link to="/get-started" className={buttonVariants({size: "sm"})}>Get Started</Link>
 					<AnimatedThemeToggler />
 				</div>
 				<MobileNav />

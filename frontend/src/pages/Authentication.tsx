@@ -2,6 +2,7 @@ import { Logo } from "@/components/core/logo"
 import DarkVeil from "@/components/DarkVeil"
 import SignIn from "@/components/forms/SignIn"
 import SignUp from "@/components/forms/SignUp"
+import { useAuth } from "@/hooks/use-auth"
 
 
 import {
@@ -11,8 +12,19 @@ import {
   CardHeader,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Navigate } from "react-router-dom"
 
 const Authentication = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex h-[90dvh] w-full items-center justify-center">Loading...</div>;
+  }
+
+  if (user) {
+    return <Navigate to={'/'} />;
+  }
+
   return (
     <div className="flex h-[90dvh] w-full items-center justify-center gap-4">
       <div className="left flex-1 hidden md:block px-8">

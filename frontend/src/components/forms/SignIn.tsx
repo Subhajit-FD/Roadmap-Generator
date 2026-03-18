@@ -26,8 +26,7 @@ import {
   Input
 } from "@/components/ui/input"
 import { useNavigate } from "react-router-dom"
-import { useAppDispatch, useAppSelector } from "@/redux/redux-hooks"
-import { loginUser } from "@/redux/features/authentication/authenticationSlice"
+import { useAuth } from "@/hooks/use-auth"
 
 
 const formSchema = z.object({
@@ -37,8 +36,7 @@ const formSchema = z.object({
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
-  const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector((state) => state.authentication)
+  const { loading, handleLogin } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,7 +45,7 @@ export default function SignIn() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
    try {
-     await dispatch(loginUser(values)).unwrap();
+     await handleLogin(values)
      toast.success("Login successful! Welcome back.")
      form.reset();
      navigate("/");
@@ -91,8 +89,8 @@ export default function SignIn() {
   </div>
   <FieldError>{form.formState.errors.password?.message}</FieldError>
 </Field>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <Button type="submit" disabled={isLoading}>{isLoading ? "Signing in..." : "Sign In"}</Button>
+        {/* {error ? <p className="text-sm text-destructive">{error}</p> : null} */}
+        <Button type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign In"}</Button>
       </form>
     </FormProvider>
   )

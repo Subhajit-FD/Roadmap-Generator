@@ -1,21 +1,33 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose")
+
 
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
+        unique: [ true, "username already taken" ],
         required: true,
-        unique: true,
     },
+
     email: {
         type: String,
+        unique: [ true, "Account already exists with this email address" ],
         required: true,
-        unique: true,
     },
+
     password: {
         type: String,
-        required: true,
+        required: true
     },
-}, { timestamps: true });   
+    tokens: {
+        type: Number,
+        default: 3
+    },
+    unlimitedExpiresAt: {
+        type: Date,
+        default: null
+    }
+})
 
-const User = mongoose.model("User", userSchema);
-export default User;
+const userModel = mongoose.model("users", userSchema)
+
+module.exports = userModel

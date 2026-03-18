@@ -10,8 +10,7 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useNavigate } from "react-router-dom"
-import { useAppDispatch, useAppSelector } from "@/redux/redux-hooks"
-import { registerUser } from "@/redux/features/authentication/authenticationSlice"
+import { useAuth } from "@/hooks/use-auth"
 
 
 const formSchema = z.object({
@@ -22,8 +21,7 @@ const formSchema = z.object({
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
-  const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector((state) => state.authentication)
+  const { loading, handleRegister } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,7 +30,7 @@ export default function SignUp() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await dispatch(registerUser(values)).unwrap();
+      await handleRegister(values)
       toast.success("Registration successful! Welcome aboard.")
       form.reset();
       navigate("/");
@@ -92,8 +90,8 @@ export default function SignUp() {
           </div>
           <FieldError>{form.formState.errors.password?.message}</FieldError>
         </Field>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <Button type="submit" disabled={isLoading}>{isLoading ? "Signing up..." : "Sign Up"}</Button>
+        {/* {error ? <p className="text-sm text-destructive">{error}</p> : null} */}
+        <Button type="submit" disabled={loading}>{loading ? "Signing up..." : "Sign Up"}</Button>
       </form>
     </FormProvider>
   )

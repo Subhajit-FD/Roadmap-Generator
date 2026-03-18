@@ -3,19 +3,28 @@ import React from "react";
 import { Portal, PortalBackdrop } from "@/components/ui/portal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { XIcon, ListIcon } from "@phosphor-icons/react";
-import { useAppSelector, useAppDispatch } from "@/redux/redux-hooks";
 import { Link } from "react-router-dom";
-import { logoutUser } from "@/redux/features/authentication/authenticationSlice";
+import { useAuth } from "@/hooks/use-auth";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export function MobileNav() {
+	const { user, handleLogout } = useAuth();
 	const [open, setOpen] = React.useState(false);
-	const navLinks = useAppSelector((state) => state.navlinks);
-	const isAuthenticated = useAppSelector((state) => state.authentication.isAuthenticated);
-	const dispatch = useAppDispatch();
+	const navLinks = [{
+		label: "Features",
+		href: "/features",
+	},{
+		label: "Pricing",
+		href: "/pricing",
+	}];
 
-	const handleLogout = () => {
-		dispatch(logoutUser());
-		setOpen(false); // Close menu after logout
+	const handleLogoutAndClose = async () => {
+		try {
+			await handleLogout();
+		} catch {
+			// ignore
+		}
+		setOpen(false);
 	};
 
 	return (
@@ -37,37 +46,82 @@ export function MobileNav() {
 			</Button>
 			{open && (
 				<Portal className="top-14" id="mobile-menu">
-					<PortalBackdrop />
+					<PortalBackdrop onClick={() => setOpen(false)} />
 					<div
 						className={cn(
 							"data-[slot=open]:zoom-in-97 ease-out data-[slot=open]:animate-in",
-							"size-full p-4"
+							"size-full p-4 flex flex-col bg-background border-b border-border shadow-2xl"
 						)}
 						data-slot={open ? "open" : "closed"}
 					>
+						<div className="flex items-center justify-between mb-6 pb-4 border-b border-border/50">
+							<span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">System Theme</span>
+							<AnimatedThemeToggler />
+						</div>
+
 						<div className="grid gap-y-2">
 							{navLinks.map((link) => (
 								<Button
 									asChild
-									className="justify-start"
+									className="justify-start uppercase tracking-widest text-[10px] font-bold"
 									key={link.label}
 									variant="ghost"
+									onClick={() => setOpen(false)}
 								>
-									<a href={link.href}>{link.label}</a>
+									<Link to={link.href}>{link.label}</Link>
 								</Button>
 							))}
-						</div>
-						<div className="mt-12 flex flex-col gap-2">
-							{isAuthenticated ? (
-								<Button variant="outline" className="w-full" onClick={handleLogout}>
-									Logout
+							{user && (
+								<Button
+									asChild
+									className="justify-start uppercase tracking-widest text-[10px] font-bold"
+									variant="ghost"
+									onClick={() => setOpen(false)}
+								>
+									<Link to="/dashboard">Dashboard</Link>
 								</Button>
-							) : (
-								<Link className={buttonVariants({ variant: "outline", className: "w-full" })} to="/sign-in" onClick={() => setOpen(false)}>
-									Sign In
-								</Link>
 							)}
-							<Button className="w-full">Get Started</Button>
+						</div>
+
+						<div className="mt-auto pb-8 flex flex-col gap-4">
+							{user && (
+								<div className="flex flex-col gap-2">
+									{user.unlimitedExpiresAt && new Date(user.unlimitedExpiresAt) > new Date() ? (
+										<div className="flex items-center gap-2 px-4 py-2 border border-border bg-secondary/10 uppercase tracking-widest text-[10px] font-bold">
+											<span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+											Unlimited Access
+										</div>
+									) : (
+										<div className="flex items-center gap-2 px-4 py-2 border border-border bg-secondary/10 uppercase tracking-widest text-[10px] font-bold">
+											<span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+											Tokens: {user.tokens ?? 0}
+										</div>
+									)}
+								</div>
+							)}
+
+							<div className="grid grid-cols-2 gap-2">
+								{user ? (
+									<Button variant="outline" className="w-full uppercase tracking-widest text-[10px] font-bold py-6" onClick={handleLogoutAndClose}>
+										Logout
+									</Button>
+								) : (
+									<Link 
+										className={buttonVariants({ variant: "outline", className: "w-full uppercase tracking-widest text-[10px] font-bold py-6" })} 
+										to="/sign-in" 
+										onClick={() => setOpen(false)}
+									>
+										Sign In
+									</Link>
+								)}
+								<Link 
+									to="/get-started" 
+									className={buttonVariants({ variant: "default", className: "w-full uppercase tracking-widest text-[10px] font-bold py-6" })}
+									onClick={() => setOpen(false)}
+								>
+									Get Started
+								</Link>
+							</div>
 						</div>
 					</div>
 				</Portal>
