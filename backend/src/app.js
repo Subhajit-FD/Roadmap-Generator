@@ -4,22 +4,13 @@ const cors = require("cors")
 
 const app = express()
 
-const allowedOrigins = [
-    "https://roadmap-generator-frontend.vercel.app",
-    "http://localhost:5173",
-].filter(Boolean);
+
 
 app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: "https://roadmap-generator-frontend.vercel.app",
     credentials: true
 }))
 
