@@ -10,10 +10,14 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors({
-    origin: "https://roadmap-generator-frontend.vercel.app",
+    origin: [
+        "https://roadmap-generator-frontend.vercel.app",
+        "http://localhost:5173",
+        process.env.CORS_ORIGIN
+    ].filter(Boolean),
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }))
 
 /* require all the routes here */
