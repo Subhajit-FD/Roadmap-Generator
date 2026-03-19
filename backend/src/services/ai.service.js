@@ -3,9 +3,7 @@ const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
-})
+
 
 
 const interviewReportSchema = z.object({
@@ -40,7 +38,12 @@ const interviewReportSchema = z.object({
 })
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
-
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
+        throw new Error("Missing GOOGLE_GENAI_API_KEY in environment variables. Please add it to Vercel.");
+    }
+    const ai = new GoogleGenAI({
+        apiKey: process.env.GOOGLE_GENAI_API_KEY
+    });
 
     const prompt = `Generate an interview report for a candidate with the following details:
                         Resume: ${resume}
