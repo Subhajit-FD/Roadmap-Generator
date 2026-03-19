@@ -5,7 +5,7 @@ const cors = require("cors")
 const app = express()
 
 const allowedOrigins = [
-    process.env.CORS_ORIGIN,
+    "https://roadmap-generator-frontend.vercel.app",
     "http://localhost:5173",
 ].filter(Boolean);
 
