@@ -13,17 +13,17 @@ async function authUser(req, res, next) {
         })
     }
 
-    const isTokenBlacklisted = await tokenBlacklistModel.findOne({
-        token
-    })
-
-    if (isTokenBlacklisted) {
-        return res.status(401).json({
-            message: "token is invalid"
-        })
-    }
-
     try {
+        const isTokenBlacklisted = await tokenBlacklistModel.findOne({
+            token
+        })
+
+        if (isTokenBlacklisted) {
+            return res.status(401).json({
+                message: "token is invalid"
+            })
+        }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
         req.user = decoded
@@ -31,12 +31,11 @@ async function authUser(req, res, next) {
         next()
 
     } catch (err) {
-
+        console.error("Auth Middleware Error:", err);
         return res.status(401).json({
-            message: "Invalid token."
+            message: "Invalid token or auth error."
         })
     }
-
 }
 
 

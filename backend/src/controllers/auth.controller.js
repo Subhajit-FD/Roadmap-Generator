@@ -9,8 +9,8 @@ const tokenBlacklistModel = require("../models/blacklist.model")
  * @access Public
  */
 async function registerUserController(req, res) {
-
-    const { username, email, password } = req.body
+    try {
+        const { username, email, password } = req.body
 
     if (!username || !email || !password) {
         return res.status(400).json({
@@ -42,7 +42,12 @@ async function registerUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000
+    })
 
 
     res.status(201).json({
@@ -51,11 +56,13 @@ async function registerUserController(req, res) {
             id: user._id,
             username: user.username,
             email: user.email,
-            tokens: user.tokens,
             unlimitedExpiresAt: user.unlimitedExpiresAt
         }
     })
-
+    } catch (err) {
+        console.error("Register Error:", err);
+        res.status(500).json({ message: "Internal server error during registration" });
+    }
 }
 
 
@@ -65,8 +72,8 @@ async function registerUserController(req, res) {
  * @access Public
  */
 async function loginUserController(req, res) {
-
-    const { email, password } = req.body
+    try {
+        const { email, password } = req.body
 
     const user = await userModel.findOne({ email })
 
@@ -90,7 +97,12 @@ async function loginUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000
+    })
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
@@ -101,6 +113,10 @@ async function loginUserController(req, res) {
             unlimitedExpiresAt: user.unlimitedExpiresAt
         }
     })
+    } catch (err) {
+        console.error("Login Error:", err);
+        res.status(500).json({ message: "Internal server error during login" });
+    }
 }
 
 
@@ -110,17 +126,26 @@ async function loginUserController(req, res) {
  * @access public
  */
 async function logoutUserController(req, res) {
-    const token = req.cookies.token
+    try {
+        const token = req.cookies.token
 
-    if (token) {
-        await tokenBlacklistModel.create({ token })
+        if (token) {
+            await tokenBlacklistModel.create({ token })
+        }
+
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        })
+
+        res.status(200).json({
+            message: "User logged out successfully"
+        })
+    } catch (err) {
+        console.error("Logout Error:", err);
+        res.status(500).json({ message: "Internal server error during logout" });
     }
-
-    res.clearCookie("token")
-
-    res.status(200).json({
-        message: "User logged out successfully"
-    })
 }
 
 /**
@@ -130,19 +155,26 @@ async function logoutUserController(req, res) {
  */
 async function getMeController(req, res) {
 
-    const user = await userModel.findById(req.user.id)
+    try {
+        const user = await userModel.findById(req.user.id)
 
-
-
-    res.status(200).json({
-        message: "User details fetched successfully",
-        user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            tokens: user.tokens
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
         }
-    })
+
+        res.status(200).json({
+            message: "User details fetched successfully",
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                tokens: user.tokens
+            }
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error during get-me" })
+    }
 
 }
 
