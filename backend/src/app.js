@@ -23,6 +23,9 @@ const paymentRouter = require("./routes/payment.routes")
 
 
 /* using all the routes here */
+app.get("/", (req, res) => {
+    res.send("Server is running")
+})
 app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
 app.use("/api/payment", paymentRouter)
