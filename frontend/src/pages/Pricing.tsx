@@ -32,7 +32,7 @@ export default function Pricing() {
                 key: rzpKey,
                 amount: order.amount,
                 currency: order.currency,
-                name: "Roadmap Generator",
+                name: "Reset",
                 description: "Purchase Tokens",
                 order_id: order.id,
                 handler: async function (response: any) {
